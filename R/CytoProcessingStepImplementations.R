@@ -473,7 +473,7 @@ removeDebrisFlowClustTmix <- function(ff,
 #     #require(flowCore, include.only = c("exprs", "rectangleGate"))
 #     
 #     message(paste0("Removing Dead Cells Gate Tail events from file : ", 
-#                    flowCore::identifier(ff)))
+#                    CytoPipeline::getFCSFileName(ff)))
 #     
 #     # if not present already, add a column with Cell ID
 #     ff <- appendCellID(ff)
@@ -590,7 +590,7 @@ removeDeadCellsDeGate <- function(ff,
 
     
     message("Removing Dead Cells events (using flowDensity::deGate())", 
-            " from file : ", flowCore::identifier(ff))
+            " from file : ", CytoPipeline::getFCSFileName(ff))
 
     # if not present already, add a column with Cell ID
     ff <- appendCellID(ff)
