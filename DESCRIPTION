@@ -1,6 +1,6 @@
 Package: CytoPipelineUtils
 Title: Utils for use with CytoPipeline
-Version: 0.99.0
+Version: 0.99.1
 Authors@R:
     c(person(given = "Philippe",
              family = "Hauchamps",
@@ -30,6 +30,7 @@ URL: https://uclouvain-cbio.github.io/CytoPipeline
 biocViews: FlowCytometry, Preprocessing, QualityControl, WorkflowStep,
  Software, Visualization
 Collate:
+    'gating.R'
     'CytoProcessingStepImplementations.R'
 Depends:
     R (>= 4.2),
@@ -43,7 +44,9 @@ Imports:
     flowDensity,
     flowStats,
     PeacoQC,
-    flowAI
+    flowAI,
+    flowWorkspace,
+    CytoML,
 Suggests:
     testthat (>= 3.0.0),
     vdiffr,

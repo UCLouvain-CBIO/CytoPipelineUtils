@@ -19,10 +19,7 @@ path <- system.file("scripts",
                     package = "CytoPipeline"
 )
 
-source(paste0(path,"/MakeOMIP021UTSamples.R"))
-
-
-
+source(file.path(path,"MakeOMIP021UTSamples.R"))
 
 test_that("removeMarginsflowAI works", {
     fs_raw <- OMIP021UTSamples
@@ -110,8 +107,8 @@ test_that("removeDebrisFlowClustTmix works", {
 # test_that("removeDeadCellsGateTail works", {
 #     ref_ff_cells <- readRDS(test_path("fixtures", "ff_cells.rds"))
 # 
-#     transListPath <- paste0(system.file("extdata", 
-#                                         package = "CytoPipeline"),
+#     transListPath <- file.path(system.file("extdata", 
+#                                            package = "CytoPipeline"),
 #                             "/OMIP021_TransList.rds")
 #     refTransList <- readRDS(transListPath)
 # 
@@ -156,9 +153,9 @@ test_that("removeDebrisFlowClustTmix works", {
 test_that("removeDeadCellsDeGate works", {
     ref_ff_cells <- readRDS(test_path("fixtures", "ff_cells.rds"))
     
-    transListPath <- paste0(system.file("extdata", 
-                                        package = "CytoPipeline"),
-                            "/OMIP021_TransList.rds")
+    transListPath <- file.path(system.file("extdata", 
+                                           package = "CytoPipeline"),
+                            "OMIP021_TransList.rds")
     refTransList <- readRDS(transListPath)
     
     ff_lcells <-
@@ -246,5 +243,63 @@ test_that("qualityControlFlowClean works", {
         flowCore::exprs(ff_QualityControl),
         flowCore::exprs(ref_ff_qualityControl_flowClean)
     )
+})
+
+test_that("applyFlowJoGate works", {
+  fs_raw <- OMIP021UTSamples
+  
+  # initial compensation first
+  compMatrix <- flowCore::spillover(OMIP021UTSamples[[1]])$SPILL
+  
+  fs_c <- CytoPipeline::runCompensation(OMIP021UTSamples, 
+                                        spillover = compMatrix)
+  
+  # flow jo workspace
+  wspFile <- system.file("extdata",
+                         "OMIP021_samples_FlowJo.wsp",
+                         package = "CytoPipelineUtils")
+  
+  ref_ff_FJ_gated1 <-
+    readRDS(test_path("fixtures", "ff_FJ_gated_cells.rds"))
+  
+  ff_FJ_gated1 <- applyFlowJoGate(
+    fs_c[[1]],
+    wspFile = wspFile,
+    gateName = "Cells")
+  
+  #saveRDS(ff_FJ_gated1, test_path("fixtures", "ff_FJ_gated_cells.rds"))
+  
+  expect_equal(
+    flowCore::exprs(ff_FJ_gated1),
+    flowCore::exprs(ref_ff_FJ_gated1)
+  )
+  
+  # ggplotFilterEvents(fs_c[[1]],
+  #                    ff_FJ_gated1,
+  #                    xChannel = "FSC-A",
+  #                    yChannel = "SSC-A")
+  
+  ref_ff_FJ_gated2 <-
+    readRDS(test_path("fixtures", "ff_FJ_gated_CD4.rds"))
+  
+  ff_FJ_gated2 <- applyFlowJoGate(
+    ff_FJ_gated1,
+    wspFile = wspFile,
+    gateName = "CD4+")
+  
+  #saveRDS(ff_FJ_gated2, test_path("fixtures", "ff_FJ_gated_CD4.rds"))
+  
+  expect_equal(
+    flowCore::exprs(ff_FJ_gated2),
+    flowCore::exprs(ref_ff_FJ_gated2)
+  )
+  
+  # ggplotFilterEvents(ff_FJ_gated1,
+  #                    ff_FJ_gated2,
+  #                    xChannel = "CD3",
+  #                    yChannel = "CD4",
+  #                    xScale = "logicle",
+  #                    yScale = "logicle")
+  
 })
 

@@ -30,10 +30,9 @@
 #'
 #' @examples
 #'
-#' rawDataDir <-
-#'     paste0(system.file("extdata", package = "CytoPipeline"), "/")
+#' rawDataDir <- system.file("extdata", package = "CytoPipeline")
 #' sampleFiles <-
-#'     paste0(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
+#'     file.path(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
 #' 
 #' truncateMaxRange <- FALSE
 #' minLimit <- NULL
@@ -96,10 +95,9 @@ removeMarginsFlowAI <- function(x, ...) {
 #'
 #' @examples
 #'
-#' rawDataDir <-
-#'     paste0(system.file("extdata", package = "CytoPipeline"), "/")
+#' rawDataDir <- system.file("extdata", package = "CytoPipeline")
 #' sampleFiles <-
-#'     paste0(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
+#'     file.path(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
 #' 
 #' truncateMaxRange <- FALSE
 #' minLimit <- NULL
@@ -184,10 +182,9 @@ removeDoubletsPeacoQC <- function(ff,
 #'
 #' @examples
 #'
-#' rawDataDir <-
-#'     paste0(system.file("extdata", package = "CytoPipeline"), "/")
+#' rawDataDir <- system.file("extdata", package = "CytoPipeline")
 #' sampleFiles <-
-#'     paste0(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
+#'     file.path(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
 #' 
 #' truncateMaxRange <- FALSE
 #' minLimit <- NULL
@@ -279,10 +276,9 @@ removeDoubletsFlowStats <- function(ff,
 #' 
 #' @examples
 #'
-#' rawDataDir <-
-#'     paste0(system.file("extdata", package = "CytoPipeline"), "/")
+#' rawDataDir <- system.file("extdata", package = "CytoPipeline")
 #' sampleFiles <-
-#'     paste0(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
+#'     file.path(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
 #' 
 #' truncateMaxRange <- FALSE
 #' minLimit <- NULL
@@ -405,10 +401,9 @@ removeDebrisFlowClustTmix <- function(ff,
 #
 # @examples
 #
-# rawDataDir <-
-#     paste0(system.file("extdata", package = "CytoPipeline"), "/")
-# sampleFiles <-
-#     paste0(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
+#' rawDataDir <- system.file("extdata", package = "CytoPipeline")
+#' sampleFiles <-
+#'     file.path(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
 # 
 # truncateMaxRange <- FALSE
 # minLimit <- NULL
@@ -546,10 +541,9 @@ removeDebrisFlowClustTmix <- function(ff,
 #'
 #' @examples
 #'
-#' rawDataDir <-
-#'     paste0(system.file("extdata", package = "CytoPipeline"), "/")
+#' rawDataDir <- system.file("extdata", package = "CytoPipeline")
 #' sampleFiles <-
-#'     paste0(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
+#'     file.path(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
 #' 
 #' truncateMaxRange <- FALSE
 #' minLimit <- NULL
@@ -658,10 +652,9 @@ removeDeadCellsDeGate <- function(ff,
 #'
 #' @examples
 #'
-#' rawDataDir <-
-#'     paste0(system.file("extdata", package = "CytoPipeline"), "/")
+#' rawDataDir <- system.file("extdata", package = "CytoPipeline")
 #' sampleFiles <-
-#'     paste0(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
+#'     file.path(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
 #' 
 #' truncateMaxRange <- FALSE
 #' minLimit <- NULL
@@ -765,10 +758,9 @@ qualityControlFlowCut <- function(ff,
 #' 
 #' @examples
 #' 
-#' rawDataDir <-
-#' paste0(system.file("extdata", package = "CytoPipeline"), "/")
+#' rawDataDir <- system.file("extdata", package = "CytoPipeline")
 #' sampleFiles <-
-#' paste0(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
+#'     file.path(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
 #' 
 #' truncateMaxRange <- FALSE
 #' minLimit <- NULL
@@ -854,3 +846,79 @@ qualityControlFlowClean <- function(ff,
     return(ff)
 }
 
+## FUNCTIONS for manual gating
+#' @title perform manual gating from a FlowJo gate
+#' @description perform manual gating by: reading a flowjo workspace file 
+#' using the flowWorkspace library, and apply one of the gates 
+#' to the inputflowFrame. Note that not only the selected gate, but also
+#' all its hierarchy of gates, will be applied to the input dataset.
+#' @param ff a flowCore::flowFrame
+#' @param wspFile a flowjo workspace
+#' @param gateName the name of the flowJo gate that will be applied 
+
+#' @param ... Extra arguments passed to `getFlowJoLabels()`
+#'
+#' @return a list with :
+#' - the first element ("matrix") is a matrix containing filtering results for
+#' each specified gate
+#' - the second element ("labels") is a vector which assigns one label to each
+#' cell. If no cell type correspond to a specific cell, than the keyword
+#' 'unlabeled' is assigned to this cell. If the cell belongs to several gates
+#' (meaning that the gates ar not disjoints), than this cell is assigned to the
+#' gate with the less matching cells.
+#' @export
+applyFlowJoGate <- function(ff,
+                            wspFile,
+                            gateName,
+                            ...) {
+  #browser()
+  # if not present already, add a column with Cell ID
+  ff <- appendCellID(ff)
+  
+  ws <- CytoML::open_flowjo_xml(wspFile)
+  sampleDF <- CytoML::fj_ws_get_samples(ws)
+  sampleGroupDF <- CytoML::fj_ws_get_sample_groups(ws)
+  
+  fcsName <- flowCore::keyword(ff, "$FIL")[[1]]
+  if (is.null(fcsName) || nchar(gsub(" ", "", fcsName)) == 0) {
+    # try with file URI
+    fcsName <- CytoPipeline::getFCSFileName(ff)
+  }
+  
+  if (is.null(fcsName) || nchar(gsub(" ", "", fcsName)) == 0) {
+    stop("Did not manage to find a file name ",
+         "=> not possible to identify sample in FlowJo workspace")
+  }
+  
+  sampleID <- sampleDF[sampleDF$name == fcsName, "sampleID", drop = TRUE]
+  
+  if (length(sampleID) == 0) {
+    stop("Could not find sampleID attached to sample name : [", 
+         fcsName, "] in FlowJo worspace")
+  }
+  
+  possibleGroups <- sampleGroupDF[sampleGroupDF$sampleID == sampleID,
+                                  "groupName", drop = TRUE]
+  samplesPerGroup <- table(
+    sampleGroupDF[which(
+      sampleGroupDF$groupName %in% possibleGroups),]$groupName)
+  
+  bestGroup <- names(samplesPerGroup)[which.min(samplesPerGroup)]
+  
+  sampleIndex <- which(
+    sampleGroupDF[sampleGroupDF$groupName == bestGroup,]$sampleID == sampleID)
+  
+  # calling gating function
+  FJLabels <- getFlowJoLabels(ff,
+                              wspFile,
+                              groups = bestGroup,
+                              sampleInGroups = sampleIndex,
+                              cellTypes = gateName,
+                              ...)
+  
+  selectedGate <- FJLabels$matrix[, gateName]
+  
+  ff <- ff[selectedGate, ]
+  
+  return(ff)
+}

@@ -38,12 +38,16 @@ this function removes dead cells from a flowFrame, using a
 specific '(a)live/dead' channel, and the flowDensity::deGate() gating
 function (see doc of the flowDensity package)
 }
+\details{
+rawDataDir <- system.file("extdata", package = "CytoPipeline")
+sampleFiles <-
+file.path(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
+}
 \examples{
 
-rawDataDir <-
-    paste0(system.file("extdata", package = "CytoPipeline"), "/")
+rawDataDir <- system.file("extdata", package = "CytoPipeline")
 sampleFiles <-
-    paste0(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
+    file.path(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
 
 truncateMaxRange <- FALSE
 minLimit <- NULL

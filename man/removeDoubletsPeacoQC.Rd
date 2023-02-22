@@ -41,10 +41,9 @@ e.g. (FSC-A, FSC-H) and (SSC-A, SSC-H)
 }
 \examples{
 
-rawDataDir <-
-    paste0(system.file("extdata", package = "CytoPipeline"), "/")
+rawDataDir <- system.file("extdata", package = "CytoPipeline")
 sampleFiles <-
-    paste0(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
+    file.path(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
 
 truncateMaxRange <- FALSE
 minLimit <- NULL
