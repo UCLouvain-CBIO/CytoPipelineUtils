@@ -41,13 +41,13 @@ function (see doc of the flowDensity package)
 \details{
 rawDataDir <- system.file("extdata", package = "CytoPipeline")
 sampleFiles <-
-file.path(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
+file.path(rawDataDir, list.files(rawDataDir, pattern = "Donor"))
 }
 \examples{
 
 rawDataDir <- system.file("extdata", package = "CytoPipeline")
 sampleFiles <-
-    file.path(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
+    file.path(rawDataDir, list.files(rawDataDir, pattern = "Donor"))
 
 truncateMaxRange <- FALSE
 minLimit <- NULL

@@ -26,7 +26,7 @@ and fluo channels are scanned.
 
 rawDataDir <- system.file("extdata", package = "CytoPipeline")
 sampleFiles <-
-    file.path(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
+    file.path(rawDataDir, list.files(rawDataDir, pattern = "Donor"))
 
 truncateMaxRange <- FALSE
 minLimit <- NULL

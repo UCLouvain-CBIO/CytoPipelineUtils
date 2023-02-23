@@ -30,7 +30,7 @@ eliminate the cluster that is the closest to the origin.
 
 rawDataDir <- system.file("extdata", package = "CytoPipeline")
 sampleFiles <-
-    file.path(rawDataDir, list.files(rawDataDir, pattern = "sample_"))
+    file.path(rawDataDir, list.files(rawDataDir, pattern = "Donor"))
 
 truncateMaxRange <- FALSE
 minLimit <- NULL

@@ -4,14 +4,7 @@
 \alias{applyFlowJoGate}
 \title{perform manual gating from a FlowJo gate}
 \usage{
-applyFlowJoGate(
-  ff,
-  preTransform = FALSE,
-  transList = NULL,
-  wspFile,
-  gateName,
-  ...
-)
+applyFlowJoGate(ff, wspFile, gateName, ...)
 }
 \arguments{
 \item{ff}{a flowCore::flowFrame}
