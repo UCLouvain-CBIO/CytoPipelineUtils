@@ -121,10 +121,23 @@ getFlowJoLabels <- function(ff,
   timeCh <- CytoPipeline::findTimeChannel(ff)
   timeStep <- 0.01
   correctTimeGain <- 0.01
+  actualDiffTime <- NULL
   
   if (!is.null(timeCh)) {
     btim_kwd <- flowCore::keyword(ff, "$BTIM")
     etim_kwd <- flowCore::keyword(ff, "$ETIM")
+    # get actual diff time back from previous endeavours, if not present,
+    # calculate it based on ff data in time channel
+    actualDiffTimeKwd <- flowCore::keyword(ff, "CytoPipeline_actualDiffTime")
+    if (is.null(actualDiffTimeKwd[["CytoPipeline_actualDiffTime"]])) {
+        timeOrder <- order(flowCore::exprs(ff)[,timeCh])
+        actualDiffTime <- 
+            (flowCore::exprs(ff)[timeOrder[flowCore::nrow(ff)], timeCh] - 
+                 flowCore::exprs(ff)[timeOrder[1], timeCh]) 
+    } else {
+        actualDiffTime <- actualDiffTimeKwd[["CytoPipeline_actualDiffTime"]]
+    }
+    
     
     # work-around to cope with different handling of time channel
     # since FlowJo v10 (not yet integrated into flowWorkspace)
@@ -141,10 +154,6 @@ getFlowJoLabels <- function(ff,
                            format="%H:%M:%S")
         
         targetDiffTime <- as.numeric(etim - btim, units = "secs")
-        timeOrder <- order(flowCore::exprs(ff)[,timeCh])
-        actualDiffTime <- 
-          (flowCore::exprs(ff)[timeOrder[flowCore::nrow(ff)], timeCh] - 
-             flowCore::exprs(ff)[timeOrder[1], timeCh]) 
         correctTimeGain <- targetDiffTime / actualDiffTime
       } else {
         correctTimeGain <- timeStep
@@ -288,6 +297,9 @@ getFlowJoLabels <- function(ff,
   for (ct in cellTypes[order(nCellsByType, decreasing = TRUE)]) {
     res$labels[cellMap[[ct]]] <- ct
   }
+  
+  # 3. computed actualDiffTime (for withFJv10TimeCorrection work-around)
+  res$actualDiffTime <- actualDiffTime
   
   return(res)
 }

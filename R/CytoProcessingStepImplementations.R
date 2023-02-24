@@ -920,5 +920,12 @@ applyFlowJoGate <- function(ff,
   
   ff <- ff[selectedGate, ]
   
+  # update actualDiffTime if needed 
+  # (needed for consistency of 'withFJv10TimeCorrection' work-around)
+  if (!is.null(FJLabels$actualDiffTime)) {
+      flowCore::keyword(ff)[["CytoPipeline_actualDiffTime"]] <-  
+          unname(FJLabels$actualDiffTime)
+  }
+  
   return(ff)
 }
