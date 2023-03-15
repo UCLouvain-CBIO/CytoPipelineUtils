@@ -129,6 +129,11 @@ removeDoubletsPeacoQC <- function(ff,
 
     # if not present already, add a column with Cell ID
     ff <- appendCellID(ff)
+    
+    # special case: if no events in input => no events in output
+    if (flowCore::nrow(ff) == 0) {
+        return(ff)
+    }
 
     # validate common scatter channel parameters
     nScatterFilters <- length(areaChannels)
@@ -215,6 +220,11 @@ removeDoubletsFlowStats <- function(ff,
                                     ...) {
     # if not present already, add a column with Cell ID
     ff <- appendCellID(ff)
+    
+    # special case: if no events in input => no events in output
+    if (flowCore::nrow(ff) == 0) {
+        return(ff)
+    }
 
     # validate common scatter channel parameters
     nScatterFilters <- length(areaChannels)
@@ -313,6 +323,11 @@ removeDebrisFlowClustTmix <- function(ff,
 
     # if not present already, add a column with Cell ID
     ff <- appendCellID(ff)
+    
+    # special case: if no events in input => no events in output
+    if (flowCore::nrow(ff) == 0) {
+        return(ff)
+    }
 
     # handle ellipsis arguments, as 'tmixFilter' does not accept unknown args
     passedEllipsisArgs <- list(...)
@@ -473,6 +488,11 @@ removeDebrisFlowClustTmix <- function(ff,
 #     # if not present already, add a column with Cell ID
 #     ff <- appendCellID(ff)
 #     
+#     # special case: if no events in input => no events in output
+#       if (flowCore::nrow(ff) == 0) {
+#           return(ff)
+#       }
+#
 #     if (preTransform) {
 #         if (is.null(transList)) {
 #             stop(
@@ -588,6 +608,11 @@ removeDeadCellsDeGate <- function(ff,
 
     # if not present already, add a column with Cell ID
     ff <- appendCellID(ff)
+    
+    # special case: if no events in input => no events in output
+    if (flowCore::nrow(ff) == 0) {
+        return(ff)
+    }
 
     if (preTransform) {
         if (is.null(transList)) {
@@ -690,6 +715,11 @@ qualityControlFlowCut <- function(ff,
                                   ...) {
     # if not present already, add a column with Cell ID
     ff <- appendCellID(ff)
+    
+    # special case: if no events in input => no events in output
+    if (flowCore::nrow(ff) == 0) {
+        return(ff)
+    }
 
     if (preTransform) {
         if (is.null(transList)) {
@@ -790,6 +820,11 @@ qualityControlFlowClean <- function(ff,
     #browser()
     # if not present already, add a column with Cell ID
     ff <- appendCellID(ff)
+    
+    # special case: if no events in input => no events in output
+    if (flowCore::nrow(ff) == 0) {
+        return(ff)
+    }
 
     if (preTransform) {
         if (is.null(transList)) {
@@ -874,6 +909,11 @@ applyFlowJoGate <- function(ff,
   #browser()
   # if not present already, add a column with Cell ID
   ff <- appendCellID(ff)
+  
+  # special case: if no events in input => no events in output
+  if (flowCore::nrow(ff) == 0) {
+      return(ff)
+  }
   
   ws <- CytoML::open_flowjo_xml(wspFile)
   sampleDF <- CytoML::fj_ws_get_samples(ws)
