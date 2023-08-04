@@ -303,3 +303,22 @@ test_that("applyFlowJoGate works", {
   
 })
 
+test_that("anonymizeMarkers works", {
+    retFF <- anonymizeMarkers(OMIP021Samples[[1]],
+                              oldMarkerNames = c("FSC-A","BV785 - CD3"),
+                              newMarkerName = c("Fwd Scatter-A", "CD3"),
+                              newExperimentName = "My experiment")
+    
+    checkMkName <- getChannelNamesFromMarkers(retFF, markers = "Fwd Scatter-A")
+    expect_equal(checkMkName, "FSC-A")
+    expect_equal(flowCore::keyword(retFF, "$P1S")[["$P1S"]], "Fwd Scatter-A")
+    
+    checkMkName <- getChannelNamesFromMarkers(retFF, markers = "CD3")
+    expect_equal(checkMkName, "670/30Violet-A")
+    expect_equal(flowCore::keyword(retFF, "$P10S")[["$P10S"]], "CD3")
+    
+    expect_equal(
+        flowCore::keyword(
+            retFF, "EXPERIMENT NAME")[["EXPERIMENT NAME"]], "My experiment")
+})
+

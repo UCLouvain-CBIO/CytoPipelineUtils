@@ -969,3 +969,64 @@ applyFlowJoGate <- function(ff,
   
   return(ff)
 }
+
+#' @title anonymizing some markers of a flowFrame
+#' @description : in a flowCore::flowFrame, update some of the marker names.
+#' This translated into : 
+#' - updating the desc field of the parameters pheno data dataframe 
+#' - updating the corresponding keyword value in the flowFrame.
+#' @param ff a flowCore::flowFrame
+#' @param oldMarkerNames the marker names to be amended, or alternatively,
+#' the channel names for which to update the marker names
+#' @param newMarkerNames the new marker names to be given 
+#' to the provided `oldMarkerNames`
+#' @param newExperimentName (optional) a new experiment name to be given to
+#' the flowFrame
+#' @param ... other arguments (not used)
+#'
+#' @return a new flowCore::flowFrame with the updated marker names
+#' (and possibly, the new experiment name)
+#' @export
+#' @examples
+#' 
+#' data(OMIP021Samples)
+#' 
+#' retFF <- anonymizeMarkers(OMIP021Samples[[1]],
+#'                           oldMarkerNames = c("FSC-A","BV785 - CD3"),
+#'                           newMarkerName = c("Fwd Scatter-A", "CD3"),
+#'                           newExperimentName = "MyExperiment")
+#'
+anonymizeMarkers <- function(ff, 
+                             oldMarkerNames, 
+                             newMarkerNames, 
+                             newExperimentName = NULL, 
+                             ...) {
+    # check inputs
+    
+    stopifnot(inherits(ff, "flowFrame"))
+    
+    if (!is.character(oldMarkerNames) || length(oldMarkerNames) == 0) {
+        stop("oldMarkerNames should be character of length > 0!")
+    }
+    
+    if (!is.character(newMarkerNames) || length(newMarkerNames) == 0) {
+        stop("oldMarkerNames should be character of length > 0!")
+    }
+    
+    if (length(oldMarkerNames) != length(newMarkerNames)) {
+        stop("length of oldMarkerNames and newMarkerNames should match!")
+    }
+    
+    for(i in seq_along(oldMarkerNames)) {
+        ff <- updateMarkerName(ff, 
+                               channel = oldMarkerNames[i], 
+                               newMarkerName = newMarkerNames[i])
+    }
+    
+    if (!is.null(newExperimentName)) {
+        flowCore::keyword(ff)[["EXPERIMENT NAME"]] <- 
+            newExperimentName
+    }
+    
+    return(ff)
+}
