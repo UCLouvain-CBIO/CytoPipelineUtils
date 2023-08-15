@@ -1018,9 +1018,9 @@ anonymizeMarkers <- function(ff,
     }
     
     for(i in seq_along(oldMarkerNames)) {
-        ff <- updateMarkerName(ff, 
-                               channel = oldMarkerNames[i], 
-                               newMarkerName = newMarkerNames[i])
+        ff <- CytoPipeline::updateMarkerName(ff, 
+                                             channel = oldMarkerNames[i], 
+                                             newMarkerName = newMarkerNames[i])
     }
     
     if (!is.null(toUpdateKeywords)) {
