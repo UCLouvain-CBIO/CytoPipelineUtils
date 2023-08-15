@@ -8,7 +8,7 @@ anonymizeMarkers(
   ff,
   oldMarkerNames,
   newMarkerNames,
-  newExperimentName = NULL,
+  toUpdateKeywords = NULL,
   ...
 )
 }
@@ -21,8 +21,7 @@ the channel names for which to update the marker names}
 \item{newMarkerNames}{the new marker names to be given
 to the provided \code{oldMarkerNames}}
 
-\item{newExperimentName}{(optional) a new experiment name to be given to
-the flowFrame}
+\item{toUpdateKeywords}{a list with new keyword values}
 
 \item{...}{other arguments (not used)}
 }
@@ -45,6 +44,7 @@ data(OMIP021Samples)
 retFF <- anonymizeMarkers(OMIP021Samples[[1]],
                           oldMarkerNames = c("FSC-A","BV785 - CD3"),
                           newMarkerName = c("Fwd Scatter-A", "CD3"),
-                          newExperimentName = "MyExperiment")
+                          toUpdateKeywords = list(
+                              "EXPERIMENT NAME" = "MyExperiment"))
 
 }

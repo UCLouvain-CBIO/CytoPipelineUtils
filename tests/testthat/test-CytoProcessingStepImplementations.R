@@ -267,7 +267,7 @@ test_that("applyFlowJoGate works", {
     wspFile = wspFile,
     gateName = "Cells")
   
-  #saveRDS(ff_FJ_gated1, test_path("fixtures", "ff_FJ_gated_cells.rds"))
+  # saveRDS(ff_FJ_gated1, test_path("fixtures", "ff_FJ_gated_cells.rds"))
   
   expect_equal(
     flowCore::exprs(ff_FJ_gated1),
@@ -287,7 +287,7 @@ test_that("applyFlowJoGate works", {
     wspFile = wspFile,
     gateName = "CD4+")
   
-  #saveRDS(ff_FJ_gated2, test_path("fixtures", "ff_FJ_gated_CD4.rds"))
+  # saveRDS(ff_FJ_gated2, test_path("fixtures", "ff_FJ_gated_CD4.rds"))
   
   expect_equal(
     flowCore::exprs(ff_FJ_gated2),
@@ -304,10 +304,12 @@ test_that("applyFlowJoGate works", {
 })
 
 test_that("anonymizeMarkers works", {
-    retFF <- anonymizeMarkers(OMIP021Samples[[1]],
+    retFF <- anonymizeMarkers(OMIP021UTSamples[[1]],
                               oldMarkerNames = c("FSC-A","BV785 - CD3"),
                               newMarkerName = c("Fwd Scatter-A", "CD3"),
-                              newExperimentName = "My experiment")
+                              toUpdateKeywords = list(
+                                  "EXPERIMENT NAME" = "My experiment",
+                                  "FILENAME" = NULL))
     
     checkMkName <- getChannelNamesFromMarkers(retFF, markers = "Fwd Scatter-A")
     expect_equal(checkMkName, "FSC-A")
@@ -320,5 +322,7 @@ test_that("anonymizeMarkers works", {
     expect_equal(
         flowCore::keyword(
             retFF, "EXPERIMENT NAME")[["EXPERIMENT NAME"]], "My experiment")
+    expect_null(
+        flowCore::keyword(retFF, "FILENAME")[["FILENAME"]])
 })
 

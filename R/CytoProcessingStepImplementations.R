@@ -980,8 +980,7 @@ applyFlowJoGate <- function(ff,
 #' the channel names for which to update the marker names
 #' @param newMarkerNames the new marker names to be given 
 #' to the provided `oldMarkerNames`
-#' @param newExperimentName (optional) a new experiment name to be given to
-#' the flowFrame
+#' @param toUpdateKeywords a list with new keyword values
 #' @param ... other arguments (not used)
 #'
 #' @return a new flowCore::flowFrame with the updated marker names
@@ -994,12 +993,13 @@ applyFlowJoGate <- function(ff,
 #' retFF <- anonymizeMarkers(OMIP021Samples[[1]],
 #'                           oldMarkerNames = c("FSC-A","BV785 - CD3"),
 #'                           newMarkerName = c("Fwd Scatter-A", "CD3"),
-#'                           newExperimentName = "MyExperiment")
+#'                           toUpdateKeywords = list(
+#'                               "EXPERIMENT NAME" = "MyExperiment"))
 #'
 anonymizeMarkers <- function(ff, 
                              oldMarkerNames, 
                              newMarkerNames, 
-                             newExperimentName = NULL, 
+                             toUpdateKeywords = NULL, 
                              ...) {
     # check inputs
     
@@ -1023,9 +1023,16 @@ anonymizeMarkers <- function(ff,
                                newMarkerName = newMarkerNames[i])
     }
     
-    if (!is.null(newExperimentName)) {
-        flowCore::keyword(ff)[["EXPERIMENT NAME"]] <- 
-            newExperimentName
+    if (!is.null(toUpdateKeywords)) {
+        if (!is.list(toUpdateKeywords)) {
+            stop("toUpdateKeywords should be a list!")
+        }
+        
+        listNames <- names(toUpdateKeywords)
+        for (i in seq_along(toUpdateKeywords)){
+            flowCore::keyword(ff)[[listNames[i]]] <- 
+                toUpdateKeywords[[listNames[i]]]
+        }
     }
     
     return(ff)
