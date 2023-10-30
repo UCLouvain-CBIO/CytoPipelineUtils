@@ -273,7 +273,6 @@ removeDoubletsFlowStats <- function(ff,
 #' using clustering capabilities of flowClust::tmixFilter(). The idea is to
 #' pre-select a number of clusters to be found in the (FSC,SSC) 2D view, and
 #' eliminate the cluster that is the closest to the origin.
-
 #' @param ff a flowCore::flowFrame
 #' @param FSCChannel the name of the FSC channel
 #' @param SSCChannel the name of the SSC channel
@@ -390,6 +389,164 @@ removeDebrisFlowClustTmix <- function(ff,
     ff <- flowCore::Subset(ff, selectedCells)
     #ff <- ff[selectedCells@subSet, ]
 
+    return(ff)
+}
+
+#' @title remove debris from a flowFrame, using flowClust
+#' @description this function removes debris from a flowFrame,
+#' using clustering capabilities of flowClust::tmixFilter(). The idea is to
+#' pre-select a number of clusters to be found in the (FSC,SSC) 2D view, and
+#' select all clusters behalve the one closest nearest the origin.
+#' Then we take all events that are inside the `probaLevel` quantile curve 
+#' for at least one of the remaining clusters. 
+#' @param ff a flowCore::flowFrame
+#' @param FSCChannel the name of the FSC channel
+#' @param SSCChannel the name of the SSC channel
+#' @param nClust number of clusters to identify
+#' @param probaLevel the probability level 
+#' @param ... additional parameters passed to flowClust::flowClust()
+#'
+#' @return a flowCore::flowFrame with removed debris events from the input
+#' @importFrom CytoPipeline appendCellID
+#' @export
+#' 
+#' @examples
+#'
+#' rawDataDir <- system.file("extdata", package = "CytoPipeline")
+#' sampleFiles <-
+#'     file.path(rawDataDir, list.files(rawDataDir, pattern = "Donor"))
+#' 
+#' truncateMaxRange <- FALSE
+#' minLimit <- NULL
+#' 
+#' # create flowCore::flowSet with all samples of a dataset
+#' fsRaw <- readSampleFiles(
+#'     sampleFiles = sampleFiles,
+#'     whichSamples = "all",
+#'     truncate_max_range = truncateMaxRange,
+#'     min.limit = minLimit)
+#' 
+#' suppressWarnings(ff_m <- removeMarginsPeacoQC(x = fsRaw[[2]]))
+#'     
+#' ff_c <-
+#'     compensateFromMatrix(ff_m,
+#'                          matrixSource = "fcs")        
+#' 
+#' 
+#' ff_cells <-
+#'     removeDebrisFlowClust(ff_c,
+#'                           FSCChannel = "FSC-A",
+#'                           SSCChannel = "SSC-A",
+#'                           nClust = 3,
+#'                           probaLevel = 0.9,
+#'                           B = 100)
+#' 
+removeDebrisFlowClust <- function(
+        ff,
+        FSCChannel,
+        SSCChannel,
+        nClust,
+        probaLevel = 0.9,
+        ...) {
+    
+    # if not present already, add a column with Cell ID
+    ff <- appendCellID(ff)
+    
+    # special case: if no events in input => no events in output
+    if (flowCore::nrow(ff) == 0) {
+        return(ff)
+    }
+    
+    varNames <- c(FSCChannel, SSCChannel)
+    for (v in varNames){
+        if (!(v %in% flowCore::colnames(ff))) {
+            stop("channel ", v, " not found in flowFrame!")
+        }
+    }
+    
+    exprUsed <- flowCore::exprs(ff)[, varNames]
+    
+    # handle ellipsis arguments, as 'tmixFilter' does not accept unknown args
+    passedEllipsisArgs <- list(...)
+    newEllipsisArgs <- list()
+    
+    argNames <-
+        c(
+            "expName", "B", "tol", "nu", "lambda", "nu.est", "trans",
+            "min.count", "max.count", "min", "max", "u.cutoff",
+            "z.cutoff", "randomStart", "B.init", "tol.init", "seed", 
+            "criterion", "prior", "usePrior"
+        )
+    for (argN in argNames) {
+        if (!is.null(passedEllipsisArgs[[argN]])) {
+            newEllipsisArgs[[argN]] <- passedEllipsisArgs[[argN]]
+        }
+    }
+    
+    flowClustObj <- do.call(
+        flowClust::flowClust,
+        args = c(
+            list(
+                x = exprUsed,
+                varNames = varNames,
+                K = nClust,
+                level = probaLevel
+            ),
+            newEllipsisArgs
+        )
+    )
+    
+    debrisIndex <- 
+        which.min(
+            apply(flowClustObj@mu, MARGIN = 1, FUN = function(x) sum(x*x)))
+    
+    nEvents <- nrow(exprUsed)
+    
+    singleNu <- (length(flowClustObj@nu) == 1)
+    if (singleNu) {
+        nu <- flowClustObj@nu
+        coord <- mvtnorm::qmvt(
+            p = probaLevel,
+            df = nu,
+            tail = "both.tail",
+            corr = diag(2))$quantile
+        mahaDistThresh <- 2*coord*coord
+    }
+    singleLambda <- (length(flowClustObj@lambda) == 1)
+    if (singleLambda){
+        transformedExprs <- 
+            flowClust::box(exprUsed, lambda = flowClustObj@lambda)
+    }
+    
+    
+    keep <- rep(FALSE, nEvents)
+    for (k in seq(nClust)[-debrisIndex]){
+        if (!singleNu) {
+            nu <- flowClustObj@nu[k]
+            coord <- mvtnorm::qmvt(
+                p = probaLevel,
+                df = nu,
+                tail = "both.tail",
+                corr = diag(2))
+            mahaDistThresh <- 2*coord*coord
+        }
+        if (!singleLambda) {
+            transformedExprs <- 
+                flowClust::box(exprUsed, lambda = flowClustObj@lambda[k])
+        }
+    
+        mahaDist <- 
+            stats::mahalanobis(transformedExprs, 
+                               center = flowClustObj@mu[k,],
+                               cov = flowClustObj@sigma[k,,],
+                               inverted = FALSE)
+                               
+        # if inside at least one cluster => keep
+        keep <- keep | (mahaDist < mahaDistThresh)        
+    }
+    
+    ff <- ff[keep, ]
+    
     return(ff)
 }
 

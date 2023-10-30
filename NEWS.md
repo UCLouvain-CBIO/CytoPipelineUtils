@@ -1,5 +1,8 @@
 # CytoPipelineUtils 0.99
 
+## CytoPipelineUtils 0.99.2
+- added 2nd version of removeDebrisFlowClust()
+
 ## CytoPipelineUtils 0.99.1
 
 - added support for FlowJo manual gating as a CytoProcessingStep
