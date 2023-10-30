@@ -1047,7 +1047,19 @@ qualityControlFlowClean <- function(ff,
 #' @param ff a flowCore::flowFrame
 #' @param wspFile a flowjo workspace
 #' @param gateName the name of the flowJo gate that will be applied 
-
+#' @param wspSource 
+#' if "import", uses `wspFile` to read the flowjo workspace 
+#' (should be a .wsp file)   
+#' if "pData", uses `pDataVar` and `pDataPathMapping` to link a specific 
+#' phenotype data variable to map different flowjo workspace files
+#' @param matrixPath if wspSource == "import", will be used as the input wsp
+#' flowJo file path
+#' @param pDataVar variable name (column of pheno data) 
+#' used to map the flowjo workspace file
+#' @param pDataPathMapping a named list:
+#' - item names are possible values of `pDataVar`
+#' - item values are character() providing the `wspFile` 
+#' for the corresponding `pDataVar` value
 #' @param ... Extra arguments passed to `getFlowJoLabels()`
 #'
 #' @return a list with :
@@ -1060,71 +1072,114 @@ qualityControlFlowClean <- function(ff,
 #' gate with the less matching cells.
 #' @export
 applyFlowJoGate <- function(ff,
-                            wspFile,
                             gateName,
+                            wspSource = c("import", "pData"),
+                            wspFile = NULL,
+                            pDataVar = NULL,
+                            pDataPathMapping = NULL,
                             ...) {
-  #browser()
-  # if not present already, add a column with Cell ID
-  ff <- appendCellID(ff)
-  
-  # special case: if no events in input => no events in output
-  if (flowCore::nrow(ff) == 0) {
-      return(ff)
-  }
-  
-  ws <- CytoML::open_flowjo_xml(wspFile)
-  sampleDF <- CytoML::fj_ws_get_samples(ws)
-  sampleGroupDF <- CytoML::fj_ws_get_sample_groups(ws)
-  
-  fcsName <- flowCore::keyword(ff, "$FIL")[[1]]
-  if (is.null(fcsName) || nchar(gsub(" ", "", fcsName)) == 0) {
-    # try with file URI
-    fcsName <- CytoPipeline::getFCSFileName(ff)
-  }
-  
-  if (is.null(fcsName) || nchar(gsub(" ", "", fcsName)) == 0) {
-    stop("Did not manage to find a file name ",
-         "=> not possible to identify sample in FlowJo workspace")
-  }
-  
-  sampleID <- sampleDF[sampleDF$name == fcsName, "sampleID", drop = TRUE]
-  
-  if (length(sampleID) == 0) {
-    stop("Could not find sampleID attached to sample name : [", 
-         fcsName, "] in FlowJo worspace")
-  }
-  
-  possibleGroups <- sampleGroupDF[sampleGroupDF$sampleID == sampleID,
-                                  "groupName", drop = TRUE]
-  samplesPerGroup <- table(
-    sampleGroupDF[which(
-      sampleGroupDF$groupName %in% possibleGroups),]$groupName)
-  
-  bestGroup <- names(samplesPerGroup)[which.min(samplesPerGroup)]
-  
-  sampleIndex <- which(
-    sampleGroupDF[sampleGroupDF$groupName == bestGroup,]$sampleID == sampleID)
-  
-  # calling gating function
-  FJLabels <- getFlowJoLabels(ff,
-                              wspFile,
-                              groups = bestGroup,
-                              sampleInGroups = sampleIndex,
-                              cellTypes = gateName,
-                              ...)
-  
-  selectedGate <- FJLabels$matrix[, gateName]
-  
-  ff <- ff[selectedGate, ]
-  
-  # update actualDiffTime if needed 
-  # (needed for consistency of 'withFJv10TimeCorrection' work-around)
-  if (!is.null(FJLabels$actualDiffTime)) {
-      flowCore::keyword(ff)[["CytoPipeline_actualDiffTime"]] <-  
-          unname(FJLabels$actualDiffTime)
-  }
-  
-  return(ff)
+    #browser()
+    
+    wspSource <- match.arg(wspSource)
+    
+    if (wspSource == "import"){
+        if (is.null(wspFile)) {
+            stop("wspFile can't be NULL if wspSource == 'import'")
+        }
+    }
+    
+    # if wspSource == "pData", check needed parameters
+    if (wspSource == "pData"){
+        if (is.null(pDataVar)) {
+            stop("pDataVar can't be NULL if wspSource == 'pData'")
+        } else if (!is.character(pDataVar)) {
+            stop("pDataVar should be a character")
+        } else if (!is.list(pDataPathMapping)) {
+            stop("pDataPathMapping should be a named list")
+        } else if (length(names(pDataPathMapping)) == 0) {
+            stop("pDataPathMapping should be a named list")
+        }
+    }
+    
+    # if not present already, add a column with Cell ID
+    ff <- appendCellID(ff)
+    
+    # special case: if no events in input => no events in output
+    if (flowCore::nrow(ff) == 0) {
+        return(ff)
+    }
+    
+    # find correct flow jo workspace path
+    if (wspSource == "pData"){
+        usedKey <- paste0("CytoPipeline_", pDataVar)
+        varValue <- flowCore::keyword(ff, usedKey)[[usedKey]]
+        if (is.null(varValue)) {
+            stop("keyword [", usedKey, "] not found in flowFrame")
+        }
+        wspFile <- pDataPathMapping[[varValue]]
+        if (is.null(wspFile)) {
+            stop("No mapping found for variable [", pDataVar, "], ",
+                 "value = ", varValue)
+        }
+        if (!is.character(wspFile)) {
+            stop("Mapping found for variable [", pDataVar, "],",
+                 "value = ", varValue, " is not a character")
+        }
+    }
+    
+    ws <- CytoML::open_flowjo_xml(wspFile)
+    sampleDF <- CytoML::fj_ws_get_samples(ws)
+    sampleGroupDF <- CytoML::fj_ws_get_sample_groups(ws)
+    
+    fcsName <- flowCore::keyword(ff, "$FIL")[[1]]
+    if (is.null(fcsName) || nchar(gsub(" ", "", fcsName)) == 0) {
+        # try with file URI
+        fcsName <- CytoPipeline::getFCSFileName(ff)
+    }
+    
+    if (is.null(fcsName) || nchar(gsub(" ", "", fcsName)) == 0) {
+        stop("Did not manage to find a file name ",
+             "=> not possible to identify sample in FlowJo workspace")
+    }
+    
+    sampleID <- sampleDF[sampleDF$name == fcsName, "sampleID", drop = TRUE]
+    
+    if (length(sampleID) == 0) {
+        stop("Could not find sampleID attached to sample name : [", 
+             fcsName, "] in FlowJo worspace")
+    }
+    
+    possibleGroups <- sampleGroupDF[sampleGroupDF$sampleID == sampleID,
+                                    "groupName", drop = TRUE]
+    samplesPerGroup <- table(
+        sampleGroupDF[which(
+            sampleGroupDF$groupName %in% possibleGroups),]$groupName)
+    
+    bestGroup <- names(samplesPerGroup)[which.min(samplesPerGroup)]
+    
+    sampleIndex <- which(
+        sampleGroupDF[sampleGroupDF$groupName == bestGroup,]$sampleID == sampleID)
+    
+    # calling gating function
+    FJLabels <- getFlowJoLabels(ff,
+                                wspFile,
+                                groups = bestGroup,
+                                sampleInGroups = sampleIndex,
+                                cellTypes = gateName,
+                                ...)
+    
+    selectedGate <- FJLabels$matrix[, gateName]
+    
+    ff <- ff[selectedGate, ]
+    
+    # update actualDiffTime if needed 
+    # (needed for consistency of 'withFJv10TimeCorrection' work-around)
+    if (!is.null(FJLabels$actualDiffTime)) {
+        flowCore::keyword(ff)[["CytoPipeline_actualDiffTime"]] <-  
+            unname(FJLabels$actualDiffTime)
+    }
+    
+    return(ff)
 }
 
 #' @title anonymizing some markers of a flowFrame

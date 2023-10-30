@@ -2,6 +2,7 @@
 
 ## CytoPipelineUtils 0.99.2
 - added 2nd version of removeDebrisFlowClust()
+- applyFlowJoGate() can now use different flowJo wsp files, depending on pData
 
 ## CytoPipelineUtils 0.99.1
 
