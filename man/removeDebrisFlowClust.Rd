@@ -4,7 +4,14 @@
 \alias{removeDebrisFlowClust}
 \title{remove debris from a flowFrame, using flowClust}
 \usage{
-removeDebrisFlowClust(ff, FSCChannel, SSCChannel, nClust, probaLevel, ...)
+removeDebrisFlowClust(
+  ff,
+  FSCChannel,
+  SSCChannel,
+  nClust,
+  probaLevel = 0.9,
+  ...
+)
 }
 \arguments{
 \item{ff}{a flowCore::flowFrame}
@@ -58,7 +65,7 @@ ff_cells <-
                           FSCChannel = "FSC-A",
                           SSCChannel = "SSC-A",
                           nClust = 3,
-                          probaLevel = 0.97,
+                          probaLevel = 0.9,
                           B = 100)
 
 }

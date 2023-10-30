@@ -4,14 +4,37 @@
 \alias{applyFlowJoGate}
 \title{perform manual gating from a FlowJo gate}
 \usage{
-applyFlowJoGate(ff, wspFile, gateName, ...)
+applyFlowJoGate(
+  ff,
+  gateName,
+  wspSource = c("import", "pData"),
+  wspFile = NULL,
+  pDataVar = NULL,
+  pDataPathMapping = NULL,
+  ...
+)
 }
 \arguments{
 \item{ff}{a flowCore::flowFrame}
 
+\item{gateName}{the name of the flowJo gate that will be applied}
+
+\item{wspSource}{if "import", uses \code{wspFile} to read the flowjo workspace
+(should be a .wsp file)
+if "pData", uses \code{pDataVar} and \code{pDataPathMapping} to link a specific
+phenotype data variable to map different flowjo workspace files}
+
 \item{wspFile}{a flowjo workspace}
 
-\item{gateName}{the name of the flowJo gate that will be applied}
+\item{pDataVar}{variable name (column of pheno data)
+used to map the flowjo workspace file}
+
+\item{pDataPathMapping}{a named list:
+\itemize{
+\item item names are possible values of \code{pDataVar}
+\item item values are character() providing the \code{wspFile}
+for the corresponding \code{pDataVar} value
+}}
 
 \item{...}{Extra arguments passed to \code{getFlowJoLabels()}}
 }

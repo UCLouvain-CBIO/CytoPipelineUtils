@@ -162,3 +162,4 @@ test_that("getFlowJoLabels works", {
   expect_equal(sum(labels == "unlabeled"), 466)
   
 })
+

@@ -55,5 +55,7 @@ Suggests:
     knitr,
     rmarkdown,
     BiocStyle
+Remotes:
+    mehrnoushmalek/flowDensity
 VignetteBuilder: knitr
 Config/testthat/edition: 3

@@ -1045,15 +1045,13 @@ qualityControlFlowClean <- function(ff,
 #' to the inputflowFrame. Note that not only the selected gate, but also
 #' all its hierarchy of gates, will be applied to the input dataset.
 #' @param ff a flowCore::flowFrame
-#' @param wspFile a flowjo workspace
 #' @param gateName the name of the flowJo gate that will be applied 
 #' @param wspSource 
 #' if "import", uses `wspFile` to read the flowjo workspace 
 #' (should be a .wsp file)   
 #' if "pData", uses `pDataVar` and `pDataPathMapping` to link a specific 
 #' phenotype data variable to map different flowjo workspace files
-#' @param matrixPath if wspSource == "import", will be used as the input wsp
-#' flowJo file path
+#' @param wspFile a flowjo workspace
 #' @param pDataVar variable name (column of pheno data) 
 #' used to map the flowjo workspace file
 #' @param pDataPathMapping a named list:

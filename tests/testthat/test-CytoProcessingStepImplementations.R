@@ -29,7 +29,7 @@ test_that("removeMarginsflowAI works", {
 
     ref_ff_m <- readRDS(test_path("fixtures", "ff_m2.rds"))
 
-    #saveRDS(ff_m, test_path("fixtures", "ff_m2.rds"))
+    # saveRDS(ff_m, test_path("fixtures", "ff_m2.rds"))
 
     expect_equal(
         flowCore::exprs(ff_m),
@@ -100,6 +100,28 @@ test_that("removeDebrisFlowClustTmix works", {
     expect_equal(
         flowCore::exprs(ff_cells),
         flowCore::exprs(ref_ff_cells)
+    )
+})
+
+test_that("removeDebrisFlowClust works", {
+    ref_ff_s <- readRDS(test_path("fixtures", "ff_s.rds"))
+    
+    ff_cells2 <-
+        removeDebrisFlowClust(
+            ref_ff_s,
+            FSCChannel = "FSC-A",
+            SSCChannel = "SSC-A",
+            nClust = 3,
+            probaLevel = 0.9,
+            B = 100)
+    
+    ref_ff_cells2 <- readRDS(test_path("fixtures", "ff_cells2.rds"))
+    
+    # saveRDS(ff_cells2, test_path("fixtures", "ff_cells2.rds"))
+    
+    expect_equal(
+        flowCore::exprs(ff_cells2),
+        flowCore::exprs(ref_ff_cells2)
     )
 })
 
