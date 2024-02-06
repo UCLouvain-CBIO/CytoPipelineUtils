@@ -111,7 +111,7 @@ getFlowJoLabels <- function(ff,
     if (length(groups) != nSamples)
       stop("groups should contain a group per sample ",
            "from which the flow frame was generated")
-    for(i in 1:nSamples){
+    for(i in seq_len(nSamples)){
       whichCellsPerSample[[i]] <-
         which(flowCore::exprs(ff)[,"File"] == sampleIdsInFile[i])
     }
@@ -222,10 +222,10 @@ getFlowJoLabels <- function(ff,
   cellMap <- list()
   foundCellType <- rep(FALSE, length(cellTypes))
   
-  for (i in 1:nSamples) {
+  for (i in seq_len(nSamples)) {
     gr <- groups[i]
     if (is.null(sampleInGroups)) {
-      whichSampleInGroup <- sum((groups == groups[i])[1:i])
+      whichSampleInGroup <- sum((groups == groups[i])[seq_len(i)])
     } else {
       whichSampleInGroup <- sampleInGroups[i]
     }
@@ -302,7 +302,7 @@ getFlowJoLabels <- function(ff,
   # label of the most rare population
   res$labels <- rep("unlabeled", nEvents)
   if (nCellTypes > 1) {
-    nCellsByType <- colSums(res$matrix[,1:nCellTypes])
+    nCellsByType <- colSums(res$matrix[,seq_len(nCellTypes)])
   } else {
     nCellsByType <- sum(res$matrix[,1])
   }
