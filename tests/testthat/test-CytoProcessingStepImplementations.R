@@ -292,8 +292,36 @@ test_that("applyFlowJoGate works", {
   # saveRDS(ff_FJ_gated1, test_path("fixtures", "ff_FJ_gated_cells.rds"))
   
   expect_equal(
+      flowCore::exprs(ff_FJ_gated1),
+      flowCore::exprs(ref_ff_FJ_gated1)
+  )
+  
+  # test with fcs name variant 1 (find pattern)
+  myFF <- fs_c[[1]] 
+  flowCore::keyword(myFF)[["$FIL"]] <- "Transformed_Donor1.fcs"
+  
+  ff_FJ_gated1 <- applyFlowJoGate(
+      myFF,
+      wspFile = wspFile,
+      gateName = "Cells")
+  
+  expect_equal(
     flowCore::exprs(ff_FJ_gated1),
     flowCore::exprs(ref_ff_FJ_gated1)
+  )
+  
+  # test with fcs name variant 2 (find pattern)
+  myFF <- fs_c[[1]] 
+  flowCore::keyword(myFF)[["$FIL"]] <- "The_Donor1_Transformed.fcs"
+  
+  ff_FJ_gated1 <- applyFlowJoGate(
+      myFF,
+      wspFile = wspFile,
+      gateName = "Cells")
+  
+  expect_equal(
+      flowCore::exprs(ff_FJ_gated1),
+      flowCore::exprs(ref_ff_FJ_gated1)
   )
   
   # ggplotFilterEvents(fs_c[[1]],

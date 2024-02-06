@@ -38,7 +38,7 @@ env:
   run_covr: 'true'
   run_pkgdown: 'true'
   has_RUnit: 'false'
-  has_BiocCheck: 'false'
+  has_BiocCheck: 'true'
   cache-version: 'cache-v1'
 
 jobs:
@@ -52,9 +52,9 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { os: ubuntu-latest, r: '4.3', bioc: '3.18', cont: "bioconductor/bioconductor_docker:devel", rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest" }
-          # - { os: macOS-latest, r: '4.3', bioc: '3.18'}
-          # - { os: windows-latest, r: '4.3', bioc: '3.18'}
+          - { os: ubuntu-latest, r: '4.4', bioc: '3.19', cont: "bioconductor/bioconductor_docker:devel", rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest" }
+          # - { os: macOS-latest, r: '4.4', bioc: '3.19'}
+          # - { os: windows-latest, r: '4.4', bioc: '3.19'}
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
       RSPM: ${{ matrix.config.rspm }}
@@ -63,7 +63,7 @@ jobs:
       VDIFFR_RUN_TESTS: false
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      CODECOV_TOKEN: 'f726ac0c-aee0-4b48-9ee0-a40acd0fac44'
+      CODECOV_TOKEN: 'bf6cfe55-b854-46d9-a5e7-a7874ae7c90e'
 
     steps:
 
@@ -163,6 +163,12 @@ jobs:
           message(paste('****', Sys.time(), 'installing BiocManager ****'))
           remotes::install_cran("BiocManager")
         shell: Rscript {0}
+        
+      # - name: Manually install vdiffr in version 1.0.5 to avoid compil error
+      #   run: |
+      #     BiocManager::install("remotes")
+      #     remotes::install_version("vdiffr", version = "1.0.5")
+      #   shell: Rscript {0} 
 
       - name: Set BiocVersion
         run: |
@@ -171,28 +177,38 @@ jobs:
 
       - name: Install dependencies
         run: |
-          ## Try installing the package dependencies in steps. First the local
-          ## dependencies, then any remaining dependencies to avoid the
-          ## issues described at
-          ## https://stat.ethz.ch/pipermail/bioc-devel/2020-April/016675.html
-          ## https://github.com/r-lib/remotes/issues/296
-          ## Ideally, all dependencies should get installed in the first pass.
+          ## work around a change in compiler setting, turning some warnings into
+          ## errors => deactivate warnings to allow some dependency package to
+          ## compile
+          withr::with_makevars(
+            c(CFLAGS = "-w",
+              CXXFLAGS = "-w",
+              CPPFLAGS = "-w"),
+            {
+              ## Try installing the package dependencies in steps. First the local
+              ## dependencies, then any remaining dependencies to avoid the
+              ## issues described at
+              ## https://stat.ethz.ch/pipermail/bioc-devel/2020-April/016675.html
+              ## https://github.com/r-lib/remotes/issues/296
+              ## Ideally, all dependencies should get installed in the first pass.
 
-          ## Pass #1 at installing dependencies
-          message(paste('****', Sys.time(), 'pass number 1 at installing dependencies: local dependencies ****'))
-          local_deps <- remotes::local_package_deps(dependencies = TRUE)
-          deps <- remotes::dev_package_deps(dependencies = TRUE, repos = BiocManager::repositories())
-          BiocManager::install(local_deps[local_deps %in% deps$package[deps$diff != 0]])
+              ## Pass #1 at installing dependencies
+              message(paste('****', Sys.time(), 'pass number 1 at installing dependencies: local dependencies ****'))
+              local_deps <- remotes::local_package_deps(dependencies = TRUE)
+              deps <- remotes::dev_package_deps(dependencies = TRUE, repos = BiocManager::repositories())
+              BiocManager::install(local_deps[local_deps %in% deps$package[deps$diff != 0]])
 
-          ## Pass #2 at installing dependencies
-          message(paste('****', Sys.time(), 'pass number 2 at installing dependencies: any remaining dependencies ****'))
-          deps <- remotes::dev_package_deps(dependencies = TRUE, repos = BiocManager::repositories())
-          BiocManager::install(deps$package[deps$diff != 0])
+              ## Pass #2 at installing dependencies
+              message(paste('****', Sys.time(), 'pass number 2 at installing dependencies: any remaining dependencies ****'))
+              deps <- remotes::dev_package_deps(dependencies = TRUE, repos = BiocManager::repositories())
+              BiocManager::install(deps$package[deps$diff != 0])
 
-          ## For running the checks
-          message(paste('****', Sys.time(), 'installing rcmdcheck and BiocCheck ****'))
-          remotes::install_cran("rcmdcheck")
-          BiocManager::install("BiocCheck")
+              ## For running the checks
+              message(paste('****', Sys.time(), 'installing rcmdcheck and BiocCheck ****'))
+              remotes::install_cran("rcmdcheck")
+              BiocManager::install("BiocCheck")
+            },
+            assignment = "+=")
         shell: Rscript {0}
         
       ## Fix error: The magick package is required to crop "...png" but not available.
@@ -218,7 +234,11 @@ jobs:
         ##if: github.ref == 'refs/heads/master' && env.run_pkgdown == 'true' && runner.os == 'Linux'
         if: env.run_pkgdown == 'true' && runner.os == 'Linux'
         run: |
-          remotes::install_github("r-lib/pkgdown")
+          withr::with_makevars(
+            c(CFLAGS = "-w",
+              CXXFLAGS = "-w"), 
+            remotes::install_github("r-lib/pkgdown"), 
+            assignment = "+=")
         shell: Rscript {0}
 
       - name: Session info
@@ -280,7 +300,7 @@ jobs:
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
-          git config --global --add safe.directory /__w/CytoPipeline/CytoPipeline
+          git config --global --add safe.directory /__w/CytoPipelineUtils/CytoPipelineUtils
           Rscript -e "pkgdown::deploy_to_branch(new_process = FALSE)"
         shell: bash {0}
         ## Note that you need to run pkgdown::deploy_to_branch(new_process = FALSE)

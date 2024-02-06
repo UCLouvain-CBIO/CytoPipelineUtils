@@ -1140,7 +1140,22 @@ applyFlowJoGate <- function(ff,
              "=> not possible to identify sample in FlowJo workspace")
     }
     
-    sampleID <- sampleDF[sampleDF$name == fcsName, "sampleID", drop = TRUE]
+    fcsNameNoExtension <- tools::file_path_sans_ext(fcsName)
+    
+    sampleNameMatch <- vapply(sampleDF$name,
+                              FUN = function(x, fileName){
+                                  xNoExtension <- tools::file_path_sans_ext(x)          
+                                  test1 <- grepl(fileName, 
+                                                 xNoExtension,
+                                                 ignore.case = TRUE)
+                                  test2 <- grepl(xNoExtension,
+                                                 fileName,
+                                                 ignore.case = TRUE)
+                                  test1 | test2},
+                              FUN.VALUE = TRUE,
+                              fileName = fcsNameNoExtension) 
+                       
+    sampleID <- sampleDF[sampleNameMatch, "sampleID", drop = TRUE]
     
     if (length(sampleID) == 0) {
         stop("Could not find sampleID attached to sample name : [", 
