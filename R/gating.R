@@ -323,10 +323,10 @@ getFlowJoLabels <- function(ff,
 #' flowFrame. Then provides nb of remaining events for the selected gates. 
 #' @param ff a flowCore::flowFrame
 #' @param wspFile a flowjo workspace
-#' @param cellTypes vector of flowJo gate nodes to parse (should be common to
+#' @param gates vector of flowJo gate nodes to parse (should be common to
 #' all groups!). Default NULL then uses either all leaf node from first group,
-#' or all gates from first group, depending on 'defaultCellTypes'.
-#' @param defaultCellTypes if cellTypes are not specified, than triggers the
+#' or all gates from first group, depending on 'defaultGates'.
+#' @param defaultGates if gates are not specified, than triggers the
 #' choice of either :
 #' - all leaf nodes ('leaves') (the default)
 #' - all nodes ('all')

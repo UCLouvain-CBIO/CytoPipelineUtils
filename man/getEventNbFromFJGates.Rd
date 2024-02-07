@@ -17,18 +17,18 @@ getEventNbFromFJGates(
 
 \item{wspFile}{a flowjo workspace}
 
-\item{...}{Extra arguments passed to \code{getFlowJoLabels()}}
-
-\item{cellTypes}{vector of flowJo gate nodes to parse (should be common to
+\item{gates}{vector of flowJo gate nodes to parse (should be common to
 all groups!). Default NULL then uses either all leaf node from first group,
-or all gates from first group, depending on 'defaultCellTypes'.}
+or all gates from first group, depending on 'defaultGates'.}
 
-\item{defaultCellTypes}{if cellTypes are not specified, than triggers the
+\item{defaultGates}{if gates are not specified, than triggers the
 choice of either :
 \itemize{
 \item all leaf nodes ('leaves') (the default)
 \item all nodes ('all')
 }}
+
+\item{...}{Extra arguments passed to \code{getFlowJoLabels()}}
 }
 \value{
 a dataframe with the nb of events per gate, including one additional
