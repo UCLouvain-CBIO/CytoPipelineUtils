@@ -1,12 +1,16 @@
 # CytoPipelineUtils 0.99
 
+## CytoPipelineUtils 0.99.4
+- Added `getEventNbFromFJGates()`
+
 ## CytoPipelineUtils 0.99.3
-- applyFlowJoGate() can now match sample file with sample names in wsp file,
+- `applyFlowJoGate()` can now match sample file with sample names in wsp file,
 by using pattern matching, instead of full file name matching
 
 ## CytoPipelineUtils 0.99.2
-- added 2nd version of removeDebrisFlowClust()
-- applyFlowJoGate() can now use different flowJo wsp files, depending on pData
+- added 2nd version of `removeDebrisFlowClust()`
+- `applyFlowJoGate()` can now use different flowJo wsp files, 
+depending on `pData`
 
 ## CytoPipelineUtils 0.99.1
 

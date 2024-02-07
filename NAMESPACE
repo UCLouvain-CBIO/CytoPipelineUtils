@@ -2,6 +2,7 @@
 
 export(anonymizeMarkers)
 export(applyFlowJoGate)
+export(getEventNbFromFJGates)
 export(getFlowJoLabels)
 export(qualityControlFlowClean)
 export(qualityControlFlowCut)

@@ -316,3 +316,90 @@ getFlowJoLabels <- function(ff,
   
   return(res)
 }
+
+#' @title perform manual gating from a FlowJo gate
+#' @description perform manual gating by: reading a flowjo workspace file 
+#' using the flowWorkspace library, and apply the selected gates to the input 
+#' flowFrame. Then provides nb of remaining events for the selected gates. 
+#' @param ff a flowCore::flowFrame
+#' @param wspFile a flowjo workspace
+#' @param cellTypes vector of flowJo gate nodes to parse (should be common to
+#' all groups!). Default NULL then uses either all leaf node from first group,
+#' or all gates from first group, depending on 'defaultCellTypes'.
+#' @param defaultCellTypes if cellTypes are not specified, than triggers the
+#' choice of either :
+#' - all leaf nodes ('leaves') (the default)
+#' - all nodes ('all')
+#' @param ... Extra arguments passed to `getFlowJoLabels()`
+#'
+#' @return a dataframe with the nb of events per gate, including one additional
+#' 'unlabelled' gate for un-labelled events.
+#' @export
+getEventNbFromFJGates <- function(
+        ff,
+        wspFile,
+        gates = NULL,
+        defaultGates = c("leaves", "all"),
+        ...) {
+    ws <- CytoML::open_flowjo_xml(wspFile)
+    sampleDF <- CytoML::fj_ws_get_samples(ws)
+    sampleGroupDF <- CytoML::fj_ws_get_sample_groups(ws)
+    
+    fcsName <- flowCore::keyword(ff, "$FIL")[[1]]
+    if (is.null(fcsName) || nchar(gsub(" ", "", fcsName)) == 0) {
+        # try with file URI
+        fcsName <- CytoPipeline::getFCSFileName(ff)
+    }
+    
+    if (is.null(fcsName) || nchar(gsub(" ", "", fcsName)) == 0) {
+        stop("Did not manage to find a file name ",
+             "=> not possible to identify sample in FlowJo workspace")
+    }
+    
+    fcsNameNoExtension <- tools::file_path_sans_ext(fcsName)
+    
+    sampleNameMatch <- vapply(sampleDF$name,
+                              FUN = function(x, fileName){
+                                  xNoExtension <- tools::file_path_sans_ext(x)          
+                                  test1 <- grepl(fileName, 
+                                                 xNoExtension,
+                                                 ignore.case = TRUE)
+                                  test2 <- grepl(xNoExtension,
+                                                 fileName,
+                                                 ignore.case = TRUE)
+                                  test1 | test2},
+                              FUN.VALUE = TRUE,
+                              fileName = fcsNameNoExtension) 
+    
+    sampleID <- sampleDF[sampleNameMatch, "sampleID", drop = TRUE]
+    
+    if (length(sampleID) == 0) {
+        stop("Could not find sampleID attached to sample name : [", 
+             fcsName, "] in FlowJo worspace")
+    }
+    
+    possibleGroups <- sampleGroupDF[sampleGroupDF$sampleID == sampleID,
+                                    "groupName", drop = TRUE]
+    samplesPerGroup <- table(
+        sampleGroupDF[which(
+            sampleGroupDF$groupName %in% possibleGroups),]$groupName)
+    
+    bestGroup <- names(samplesPerGroup)[which.min(samplesPerGroup)]
+    
+    sampleIndex <- which(
+        sampleGroupDF[sampleGroupDF$groupName == bestGroup,]$sampleID == sampleID)
+    
+    # calling gating function
+    FJLabels <- getFlowJoLabels(ff,
+                                wspFile,
+                                groups = bestGroup,
+                                sampleInGroups = sampleIndex,
+                                cellTypes = gates,
+                                defaultCellTypes = defaultGates,
+                                ...)
+    
+    eventNbs<- colSums(FJLabels$matrix)
+    eventNbDF <- data.frame(gate = names(eventNbs),
+                            eventNb = eventNbs)
+    eventNbDF
+}
