@@ -2,6 +2,9 @@
 
 ## CytoPipelineUtils 0.99.4
 - Added `getEventNbFromFJGates()`
+- In `getFlowJoLabels()`, if one of the `cellTypes` is not found in any sample 
+of any group, issue warning instead of error, populates corresponding output 
+with NA's
 
 ## CytoPipelineUtils 0.99.3
 - `applyFlowJoGate()` can now match sample file with sample names in wsp file,

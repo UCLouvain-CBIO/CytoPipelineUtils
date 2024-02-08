@@ -277,7 +277,7 @@ getFlowJoLabels <- function(ff,
   for (j in seq_along(cellTypes)) {
     if (!foundCellType[j]) {
       ct <- cellTypes[j]
-      stop("Cell type [", ct, "] not found in any sample of any group !")
+      warning("Cell type [", ct, "] not found in any sample of any group !")
     }
   }
   
@@ -292,10 +292,14 @@ getFlowJoLabels <- function(ff,
                        dimnames = list(NULL ,c(cellTypes, "unlabeled")))
   
   for (ct in cellTypes){
-    res$matrix[cellMap[[ct]], ct] <- TRUE
+      if (is.null(cellMap[[ct]])) {
+          res$matrix[, ct] <- NA
+      } else {
+          res$matrix[cellMap[[ct]], ct] <- TRUE
+      }
   }
   
-  res$matrix[, nCellTypes+1] <- (rowSums(res$matrix) == 0)
+  res$matrix[, nCellTypes+1] <- (rowSums(res$matrix, na.rm = TRUE) == 0)
   
   
   # 2. 'labels' with one label attached to each cell. If conflict, take the
@@ -308,7 +312,9 @@ getFlowJoLabels <- function(ff,
   }
   
   for (ct in cellTypes[order(nCellsByType, decreasing = TRUE)]) {
-    res$labels[cellMap[[ct]]] <- ct
+      if(!is.null(cellMap[[ct]])) {
+          res$labels[cellMap[[ct]]] <- ct
+      }
   }
   
   # 3. computed actualDiffTime (for withFJv10TimeCorrection work-around)

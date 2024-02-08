@@ -138,11 +138,21 @@ test_that("getFlowJoLabels works", {
     # what happens when cell type not found ?
     cellTypes <- c("Cells", "Debrais", "CD4+")
     
-    expect_error(getFlowJoLabels(agg,
+    expect_warning(resW <- getFlowJoLabels(agg,
                                  wspFile = wspFile,
                                  groups = groups,
                                  cellTypes = cellTypes),
-                 regexp = "not found in any sample of any group")
+                   regexp = "not found in any sample of any group")
+    
+    labels <- resW$labels
+    
+    expect_equal(sum(labels == "Cells"), 5518)
+    expect_equal(sum(labels == "CD4+"), 2552)
+    expect_equal(sum(labels == "Debrais"), 0)
+    expect_equal(sum(labels == "unlabeled"), 1930)
+    
+    expect_equal(sum(resW$matrix[,"Cells"]), 8070)
+    expect_true(all(is.na(resW$matrix[,"Debrais"])))
     
     # with subset file from sample two only (special case where file 1 is not
     # represented in aggregate)
