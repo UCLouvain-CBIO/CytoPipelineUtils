@@ -13,7 +13,9 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details (<http://www.gnu.org/licenses/>).
 
-library(testthat)
-library(CytoPipelineUtils)
+#' @keywords internal
+"_PACKAGE"
 
-test_check("CytoPipelineUtils")
+## usethis namespace: start
+## usethis namespace: end
+NULL
