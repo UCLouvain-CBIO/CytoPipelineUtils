@@ -1164,6 +1164,13 @@ applyFlowJoGate <- function(ff,
     
     possibleGroups <- sampleGroupDF[sampleGroupDF$sampleID == sampleID,
                                     "groupName", drop = TRUE]
+    
+    if (length(possibleGroups) > 1 && "All Samples" %in% possibleGroups) {
+        # remove All Samples which is the by default sample group
+        # to avoid complain of CytoML function
+        possibleGroups <- possibleGroups[-which(possibleGroups == "All Samples")]
+    }
+    
     samplesPerGroup <- table(
         sampleGroupDF[which(
             sampleGroupDF$groupName %in% possibleGroups),]$groupName)

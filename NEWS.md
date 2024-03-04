@@ -1,5 +1,10 @@
 # CytoPipelineUtils 0.99
 
+## CytoPipelineUtils 0.99.5
+- in applyFlowJoGate(): try to avoid using 'All Samples' generic sample group
+to query flowjo workspace (in order to avoid CytoML warning when using 
+'All Samples')
+
 ## CytoPipelineUtils 0.99.4
 - Added `getEventNbFromFJGates()`
 - In `getFlowJoLabels()`, if one of the `cellTypes` is not found in any sample 
