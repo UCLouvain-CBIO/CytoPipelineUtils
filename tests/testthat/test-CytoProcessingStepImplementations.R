@@ -354,12 +354,14 @@ test_that("applyFlowJoGate works", {
 })
 
 test_that("anonymizeMarkers works", {
-    retFF <- anonymizeMarkers(OMIP021UTSamples[[1]],
-                              oldMarkerNames = c("FSC-A","BV785 - CD3"),
-                              newMarkerName = c("Fwd Scatter-A", "CD3"),
-                              toUpdateKeywords = list(
-                                  "EXPERIMENT NAME" = "My experiment",
-                                  "FILENAME" = NULL))
+    retFF <- anonymizeMarkers(
+        OMIP021UTSamples[[1]],
+        oldMarkerNames = c("FSC-A","BV785 - CD3"),
+        newMarkerName = c("Fwd Scatter-A", "CD3"),
+        toUpdateKeywords = list(
+            "EXPERIMENT NAME" = "My experiment",
+            "FILENAME" = NULL)
+    )
     
     checkMkName <- getChannelNamesFromMarkers(retFF, markers = "Fwd Scatter-A")
     expect_equal(checkMkName, "FSC-A")
@@ -374,5 +376,21 @@ test_that("anonymizeMarkers works", {
             retFF, "EXPERIMENT NAME")[["EXPERIMENT NAME"]], "My experiment")
     expect_null(
         flowCore::keyword(retFF, "FILENAME")[["FILENAME"]])
+    
+    # without anonymization of marker names, only keywords update
+    retFF2 <- anonymizeMarkers(
+        OMIP021UTSamples[[1]],
+        oldMarkerNames = c(),
+        newMarkerName = c(),
+        toUpdateKeywords = list(
+            "EXPERIMENT NAME" = "My experiment",
+            "FILENAME" = NULL))
+    
+    expect_equal(
+        flowCore::keyword(
+            retFF2, "EXPERIMENT NAME")[["EXPERIMENT NAME"]], "My experiment")
+    expect_null(
+        flowCore::keyword(retFF2, "FILENAME")[["FILENAME"]])
+    
 })
 

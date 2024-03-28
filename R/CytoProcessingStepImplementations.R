@@ -1237,12 +1237,12 @@ anonymizeMarkers <- function(ff,
     
     stopifnot(inherits(ff, "flowFrame"))
     
-    if (!is.character(oldMarkerNames) || length(oldMarkerNames) == 0) {
-        stop("oldMarkerNames should be character of length > 0!")
+    if (!is.character(oldMarkerNames) && length(oldMarkerNames) > 0) {
+        stop("oldMarkerNames should be a character!")
     }
     
-    if (!is.character(newMarkerNames) || length(newMarkerNames) == 0) {
-        stop("oldMarkerNames should be character of length > 0!")
+    if (!is.character(newMarkerNames) && length(newMarkerNames) > 0) {
+        stop("oldMarkerNames should be character!")
     }
     
     if (length(oldMarkerNames) != length(newMarkerNames)) {
