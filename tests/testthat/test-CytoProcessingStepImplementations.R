@@ -353,6 +353,41 @@ test_that("applyFlowJoGate works", {
   
 })
 
+test_that("addFlowJoGatesInfo works", {
+    fs_raw <- OMIP021UTSamples
+    
+    # initial compensation first
+    compMatrix <- flowCore::spillover(OMIP021UTSamples[[1]])$SPILL
+    
+    fs_c <- CytoPipeline::runCompensation(OMIP021UTSamples, 
+                                          spillover = compMatrix)
+    
+    # flow jo workspace
+    wspFile <- system.file("extdata",
+                           "OMIP021_samples_FlowJo.wsp",
+                           package = "CytoPipelineUtils")
+    
+    ref_ff_FJ_gated1 <-
+        readRDS(test_path("fixtures", "ff_FJ_gated_cells.rds"))
+    
+    ref_ff_FJ_gated2 <-
+        readRDS(test_path("fixtures", "ff_FJ_gated_CD4.rds"))
+    
+    ff_FJ <- addFlowJoGatesInfo(
+        fs_c[[1]],
+        wspFile = wspFile,
+        gateNames = c("Cells", "CD4+"))
+    
+    refNbCells <- flowCore::nrow(ref_ff_FJ_gated1)
+    refNbCD4 <- flowCore::nrow(ref_ff_FJ_gated2)
+    
+    expect_true("Cells" %in% flowCore::colnames(ff_FJ))
+    expect_true("CD4+" %in% flowCore::colnames(ff_FJ))
+    
+    expect_equal(sum(flowCore::exprs(ff_FJ)[, "Cells"]), refNbCells)
+    expect_equal(sum(flowCore::exprs(ff_FJ)[, "CD4+"]), refNbCD4)
+})
+
 test_that("anonymizeMarkers works", {
     retFF <- anonymizeMarkers(
         OMIP021UTSamples[[1]],
