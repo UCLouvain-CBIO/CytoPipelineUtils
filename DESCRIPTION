@@ -1,6 +1,6 @@
 Package: CytoPipelineUtils
 Title: Utils for use with CytoPipeline
-Version: 0.99.5
+Version: 0.99.6
 Authors@R:
     c(person(given = "Philippe",
              family = "Hauchamps",
@@ -24,9 +24,9 @@ Description: This package is meant to be used in conjunction of CytoPipeline
 License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 BugReports: https://github.com/UCLouvain-CBIO/CytoPipelineUtils/issues
-URL: https://uclouvain-cbio.github.io/CytoPipeline
+URL: https://uclouvain-cbio.github.io/CytoPipelineUtils
 biocViews: FlowCytometry, Preprocessing, QualityControl, WorkflowStep,
  Software, Visualization
 Collate:
@@ -34,7 +34,7 @@ Collate:
     'CytoProcessingStepImplementations.R'
     'CytoPipelineUtils-package.R'
 Depends:
-    R (>= 4.3),
+    R (>= 4.4),
     CytoPipeline
 Imports:
     stats,
@@ -55,6 +55,7 @@ Suggests:
     diffviewer,
     knitr,
     rmarkdown,
-    BiocStyle
+    BiocStyle,
+    CytoPipelineGUI
 VignetteBuilder: knitr
 Config/testthat/edition: 3

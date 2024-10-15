@@ -1,5 +1,8 @@
 # CytoPipelineUtils 0.99
 
+## CytoPipelineUtils 0.99.6
+- implemented `pkgdown` customization
+
 ## CytoPipelineUtils 0.99.5
 - in applyFlowJoGate(): try to avoid using 'All Samples' generic sample group
 to query flowjo workspace (in order to avoid CytoML warning when using 

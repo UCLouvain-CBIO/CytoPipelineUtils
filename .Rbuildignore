@@ -3,3 +3,7 @@
 ^\.git$
 ^\.github$
 ^data-raw$
+^doc$
+^Meta$
+^docs$
+^pkgdown$
