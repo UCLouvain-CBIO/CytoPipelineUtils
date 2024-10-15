@@ -1,69 +1,25 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>/404.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>/articles/Demo.html</loc>
-  </url>
-  <url>
-    <loc>/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>/authors.html</loc>
-  </url>
-  <url>
-    <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/news/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/CytoPipelineUtils-package.html</loc>
-  </url>
-  <url>
-    <loc>/reference/addFlowJoGatesInfo.html</loc>
-  </url>
-  <url>
-    <loc>/reference/anonymizeMarkers.html</loc>
-  </url>
-  <url>
-    <loc>/reference/applyFlowJoGate.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getEventNbFromFJGates.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getFlowJoLabels.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/qualityControlFlowClean.html</loc>
-  </url>
-  <url>
-    <loc>/reference/qualityControlFlowCut.html</loc>
-  </url>
-  <url>
-    <loc>/reference/removeDeadCellsDeGate.html</loc>
-  </url>
-  <url>
-    <loc>/reference/removeDebrisFlowClust.html</loc>
-  </url>
-  <url>
-    <loc>/reference/removeDebrisFlowClustTmix.html</loc>
-  </url>
-  <url>
-    <loc>/reference/removeDoubletsFlowStats.html</loc>
-  </url>
-  <url>
-    <loc>/reference/removeDoubletsPeacoQC.html</loc>
-  </url>
-  <url>
-    <loc>/reference/removeMarginsFlowAI.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://uclouvain-cbio.github.io/CytoPipelineUtils/404.html</loc></url>
+<url><loc>https://uclouvain-cbio.github.io/CytoPipelineUtils/LICENSE-text.html</loc></url>
+<url><loc>https://uclouvain-cbio.github.io/CytoPipelineUtils/articles/Demo.html</loc></url>
+<url><loc>https://uclouvain-cbio.github.io/CytoPipelineUtils/articles/index.html</loc></url>
+<url><loc>https://uclouvain-cbio.github.io/CytoPipelineUtils/authors.html</loc></url>
+<url><loc>https://uclouvain-cbio.github.io/CytoPipelineUtils/index.html</loc></url>
+<url><loc>https://uclouvain-cbio.github.io/CytoPipelineUtils/news/index.html</loc></url>
+<url><loc>https://uclouvain-cbio.github.io/CytoPipelineUtils/reference/CytoPipelineUtils-package.html</loc></url>
+<url><loc>https://uclouvain-cbio.github.io/CytoPipelineUtils/reference/addFlowJoGatesInfo.html</loc></url>
+<url><loc>https://uclouvain-cbio.github.io/CytoPipelineUtils/reference/anonymizeMarkers.html</loc></url>
+<url><loc>https://uclouvain-cbio.github.io/CytoPipelineUtils/reference/applyFlowJoGate.html</loc></url>
+<url><loc>https://uclouvain-cbio.github.io/CytoPipelineUtils/reference/getEventNbFromFJGates.html</loc></url>
+<url><loc>https://uclouvain-cbio.github.io/CytoPipelineUtils/reference/getFlowJoLabels.html</loc></url>
+<url><loc>https://uclouvain-cbio.github.io/CytoPipelineUtils/reference/index.html</loc></url>
+<url><loc>https://uclouvain-cbio.github.io/CytoPipelineUtils/reference/qualityControlFlowClean.html</loc></url>
+<url><loc>https://uclouvain-cbio.github.io/CytoPipelineUtils/reference/qualityControlFlowCut.html</loc></url>
+<url><loc>https://uclouvain-cbio.github.io/CytoPipelineUtils/reference/removeDeadCellsDeGate.html</loc></url>
+<url><loc>https://uclouvain-cbio.github.io/CytoPipelineUtils/reference/removeDebrisFlowClust.html</loc></url>
+<url><loc>https://uclouvain-cbio.github.io/CytoPipelineUtils/reference/removeDebrisFlowClustTmix.html</loc></url>
+<url><loc>https://uclouvain-cbio.github.io/CytoPipelineUtils/reference/removeDoubletsFlowStats.html</loc></url>
+<url><loc>https://uclouvain-cbio.github.io/CytoPipelineUtils/reference/removeDoubletsPeacoQC.html</loc></url>
+<url><loc>https://uclouvain-cbio.github.io/CytoPipelineUtils/reference/removeMarginsFlowAI.html</loc></url>
 </urlset>
+
