@@ -1,10 +1,15 @@
 # CytoPipelineUtils 0.99
 
-## CytoPipelineUtils 0.99.6
+## CytoPipelineUtils 0.99.7
 - implemented `pkgdown` customization
 
+## CytoPipelineUtils 0.99.6
+- `anonymizeMarkers()` can now work with no marker anonymization 
+(only keyword changes)
+- implemented `addFlowJoGatesInfo()`
+
 ## CytoPipelineUtils 0.99.5
-- in applyFlowJoGate(): try to avoid using 'All Samples' generic sample group
+- in `applyFlowJoGate()`: try to avoid using 'All Samples' generic sample group
 to query flowjo workspace (in order to avoid CytoML warning when using 
 'All Samples')
 

@@ -1041,88 +1041,28 @@ qualityControlFlowClean <- function(ff,
 ## FUNCTIONS for manual gating
 #' @title perform manual gating from a FlowJo gate
 #' @description perform manual gating by: reading a flowjo workspace file 
-#' using the flowWorkspace library, and apply one of the gates 
-#' to the inputflowFrame. Note that not only the selected gate, but also
+#' using the CytoML package, and apply one of the gates 
+#' to the input flowFrame. Note that not only the selected gate, but also
 #' all its hierarchy of gates, will be applied to the input dataset.
 #' @param ff a flowCore::flowFrame
 #' @param gateName the name of the flowJo gate that will be applied 
-#' @param wspSource 
-#' if "import", uses `wspFile` to read the flowjo workspace 
-#' (should be a .wsp file)   
-#' if "pData", uses `pDataVar` and `pDataPathMapping` to link a specific 
-#' phenotype data variable to map different flowjo workspace files
 #' @param wspFile a flowjo workspace
-#' @param pDataVar variable name (column of pheno data) 
-#' used to map the flowjo workspace file
-#' @param pDataPathMapping a named list:
-#' - item names are possible values of `pDataVar`
-#' - item values are character() providing the `wspFile` 
-#' for the corresponding `pDataVar` value
 #' @param ... Extra arguments passed to `getFlowJoLabels()`
 #'
-#' @return a list with :
-#' - the first element ("matrix") is a matrix containing filtering results for
-#' each specified gate
-#' - the second element ("labels") is a vector which assigns one label to each
-#' cell. If no cell type correspond to a specific cell, than the keyword
-#' 'unlabeled' is assigned to this cell. If the cell belongs to several gates
-#' (meaning that the gates ar not disjoints), than this cell is assigned to the
-#' gate with the less matching cells.
+#' @return a flowFrame containing only the events inside the gate
 #' @export
 applyFlowJoGate <- function(ff,
                             gateName,
-                            wspSource = c("import", "pData"),
-                            wspFile = NULL,
-                            pDataVar = NULL,
-                            pDataPathMapping = NULL,
+                            wspFile,
                             ...) {
     #browser()
-    
-    wspSource <- match.arg(wspSource)
-    
-    if (wspSource == "import"){
-        if (is.null(wspFile)) {
-            stop("wspFile can't be NULL if wspSource == 'import'")
-        }
-    }
-    
-    # if wspSource == "pData", check needed parameters
-    if (wspSource == "pData"){
-        if (is.null(pDataVar)) {
-            stop("pDataVar can't be NULL if wspSource == 'pData'")
-        } else if (!is.character(pDataVar)) {
-            stop("pDataVar should be a character")
-        } else if (!is.list(pDataPathMapping)) {
-            stop("pDataPathMapping should be a named list")
-        } else if (length(names(pDataPathMapping)) == 0) {
-            stop("pDataPathMapping should be a named list")
-        }
-    }
-    
+
     # if not present already, add a column with Cell ID
     ff <- appendCellID(ff)
     
     # special case: if no events in input => no events in output
     if (flowCore::nrow(ff) == 0) {
         return(ff)
-    }
-    
-    # find correct flow jo workspace path
-    if (wspSource == "pData"){
-        usedKey <- paste0("CytoPipeline_", pDataVar)
-        varValue <- flowCore::keyword(ff, usedKey)[[usedKey]]
-        if (is.null(varValue)) {
-            stop("keyword [", usedKey, "] not found in flowFrame")
-        }
-        wspFile <- pDataPathMapping[[varValue]]
-        if (is.null(wspFile)) {
-            stop("No mapping found for variable [", pDataVar, "], ",
-                 "value = ", varValue)
-        }
-        if (!is.character(wspFile)) {
-            stop("Mapping found for variable [", pDataVar, "],",
-                 "value = ", varValue, " is not a character")
-        }
     }
     
     ws <- CytoML::open_flowjo_xml(wspFile)
@@ -1202,6 +1142,107 @@ applyFlowJoGate <- function(ff,
     return(ff)
 }
 
+#' @title add FlowJo manual gates membership information to a flow frame
+#' @description reads a flowjo workspace file using the CytoML package, 
+#' and extract cell by cell information as to whether the considered cell is
+#' within or outside user chosen gates. 
+#' Note that not only the selected gate, but also 
+#' all its hierarchy of gates, will be checked when extracting the gate
+#' membership information.
+#' @param ff a flowCore::flowFrame
+#' @param gateNames a character vector, containing the names of the 
+#' flowJo gates to be checked 
+#' @param wspFile a flowjo workspace
+#' @param ... Extra arguments passed to `getFlowJoLabels()`
+#'
+#' @return the input flowFrame, filled with additional columns of logical
+#' one per checked gate. The name of the new columns match the name of the 
+#' gates.
+#' @export
+addFlowJoGatesInfo <- function(ff,
+                            gateNames,
+                            wspFile,
+                            ...) {
+    #browser()
+    
+    # if not present already, add a column with Cell ID
+    ff <- appendCellID(ff)
+    
+    # special case: if no events in input => no events in output
+    if (flowCore::nrow(ff) == 0) {
+        return(ff)
+    }
+    
+    ws <- CytoML::open_flowjo_xml(wspFile)
+    sampleDF <- CytoML::fj_ws_get_samples(ws)
+    sampleGroupDF <- CytoML::fj_ws_get_sample_groups(ws)
+    
+    fcsName <- flowCore::keyword(ff, "$FIL")[[1]]
+    if (is.null(fcsName) || nchar(gsub(" ", "", fcsName)) == 0) {
+        # try with file URI
+        fcsName <- CytoPipeline::getFCSFileName(ff)
+    }
+    
+    if (is.null(fcsName) || nchar(gsub(" ", "", fcsName)) == 0) {
+        stop("Did not manage to find a file name ",
+             "=> not possible to identify sample in FlowJo workspace")
+    }
+    
+    fcsNameNoExtension <- tools::file_path_sans_ext(fcsName)
+    
+    sampleNameMatch <- vapply(sampleDF$name,
+                              FUN = function(x, fileName){
+                                  xNoExtension <- tools::file_path_sans_ext(x)          
+                                  test1 <- grepl(fileName, 
+                                                 xNoExtension,
+                                                 ignore.case = TRUE)
+                                  test2 <- grepl(xNoExtension,
+                                                 fileName,
+                                                 ignore.case = TRUE)
+                                  test1 | test2},
+                              FUN.VALUE = TRUE,
+                              fileName = fcsNameNoExtension) 
+    
+    sampleID <- sampleDF[sampleNameMatch, "sampleID", drop = TRUE]
+    
+    if (length(sampleID) == 0) {
+        stop("Could not find sampleID attached to sample name : [", 
+             fcsName, "] in FlowJo worspace")
+    }
+    
+    possibleGroups <- sampleGroupDF[sampleGroupDF$sampleID == sampleID,
+                                    "groupName", drop = TRUE]
+    
+    if (length(possibleGroups) > 1 && "All Samples" %in% possibleGroups) {
+        # remove All Samples which is the by default sample group
+        # to avoid complain of CytoML function
+        possibleGroups <- possibleGroups[-which(possibleGroups == "All Samples")]
+    }
+    
+    samplesPerGroup <- table(
+        sampleGroupDF[which(
+            sampleGroupDF$groupName %in% possibleGroups),]$groupName)
+    
+    bestGroup <- names(samplesPerGroup)[which.min(samplesPerGroup)]
+    
+    sampleIndex <- which(
+        sampleGroupDF[sampleGroupDF$groupName == bestGroup,]$sampleID == sampleID)
+    
+    # calling gating function
+    FJLabels <- getFlowJoLabels(ff,
+                                wspFile,
+                                groups = bestGroup,
+                                sampleInGroups = sampleIndex,
+                                cellTypes = gateNames,
+                                ...)
+    
+    selectedGates <- FJLabels$matrix[, gateNames]
+    
+    ff <- flowCore::fr_append_cols(ff, selectedGates)
+    
+    return(ff)
+}
+
 #' @title anonymizing some markers of a flowFrame
 #' @description : in a flowCore::flowFrame, update some of the marker names.
 #' This translated into : 
@@ -1237,12 +1278,12 @@ anonymizeMarkers <- function(ff,
     
     stopifnot(inherits(ff, "flowFrame"))
     
-    if (!is.character(oldMarkerNames) || length(oldMarkerNames) == 0) {
-        stop("oldMarkerNames should be character of length > 0!")
+    if (!is.character(oldMarkerNames) && length(oldMarkerNames) > 0) {
+        stop("oldMarkerNames should be a character!")
     }
     
-    if (!is.character(newMarkerNames) || length(newMarkerNames) == 0) {
-        stop("oldMarkerNames should be character of length > 0!")
+    if (!is.character(newMarkerNames) && length(newMarkerNames) > 0) {
+        stop("oldMarkerNames should be character!")
     }
     
     if (length(oldMarkerNames) != length(newMarkerNames)) {
