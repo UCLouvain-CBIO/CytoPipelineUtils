@@ -1,9 +1,9 @@
-pandoc: '3.4'
-pkgdown: 2.1.1.9000
-pkgdown_sha: 71fd32ce95f17b379e57e7e33f2294bc034727fd
+pandoc: 3.6.4
+pkgdown: 2.1.2.9000
+pkgdown_sha: 99457e7fa7f36696ae743b06aca59c0fdd97a7d6
 articles:
   Demo: Demo.html
-last_built: 2024-10-15T10:08Z
+last_built: 2025-05-15T10:23Z
 urls:
   reference: https://uclouvain-cbio.github.io/CytoPipelineUtils/reference
   article: https://uclouvain-cbio.github.io/CytoPipelineUtils/articles
