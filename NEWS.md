@@ -1,5 +1,8 @@
 # CytoPipelineUtils 0.99
 
+## CytoPipelineUtils 0.99.8
+- migrated to GHA cache v4
+
 ## CytoPipelineUtils 0.99.7
 - implemented `pkgdown` customization
 
