@@ -13,7 +13,7 @@ all its hierarchy of gates, will be applied to the input dataset."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">CytoPipelineUtils</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,7 +52,7 @@ all its hierarchy of gates, will be applied to the input dataset.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">applyFlowJoGate</span><span class="op">(</span><span class="va">ff</span>, <span class="va">gateName</span>, <span class="va">wspFile</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">applyFlowJoGate</span><span class="op">(</span><span class="va">ff</span>, <span class="va">gateName</span>, <span class="va">wspFile</span>, FJGroupName <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -69,6 +69,11 @@ all its hierarchy of gates, will be applied to the input dataset.</p>
 
 <dt id="arg-wspfile">wspFile<a class="anchor" aria-label="anchor" href="#arg-wspfile"></a></dt>
 <dd><p>a flowjo workspace</p></dd>
+
+
+<dt id="arg-fjgroupname">FJGroupName<a class="anchor" aria-label="anchor" href="#arg-fjgroupname"></a></dt>
+<dd><p>optional flowjo group name in which to look for the sample
+file. This can be helpful in case of duplicate file names.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
