@@ -1047,7 +1047,7 @@ qualityControlFlowClean <- function(ff,
 #' @param ff a flowCore::flowFrame
 #' @param gateName the name of the flowJo gate that will be applied 
 #' @param wspFile a flowjo workspace
-#' @param FJGroup optional flowjo group name in which to look for the sample
+#' @param FJGroupName optional flowjo group name in which to look for the sample
 #' file. This can be helpful in case of duplicate file names.
 #' @param ... Extra arguments passed to `getFlowJoLabels()`
 #'

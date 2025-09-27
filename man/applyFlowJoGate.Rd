@@ -13,10 +13,10 @@ applyFlowJoGate(ff, gateName, wspFile, FJGroupName = NULL, ...)
 
 \item{wspFile}{a flowjo workspace}
 
-\item{...}{Extra arguments passed to \code{getFlowJoLabels()}}
-
-\item{FJGroup}{optional flowjo group name in which to look for the sample
+\item{FJGroupName}{optional flowjo group name in which to look for the sample
 file. This can be helpful in case of duplicate file names.}
+
+\item{...}{Extra arguments passed to \code{getFlowJoLabels()}}
 }
 \value{
 a flowFrame containing only the events inside the gate
