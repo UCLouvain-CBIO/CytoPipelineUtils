@@ -4,7 +4,7 @@
 \alias{applyFlowJoGate}
 \title{perform manual gating from a FlowJo gate}
 \usage{
-applyFlowJoGate(ff, gateName, wspFile, ...)
+applyFlowJoGate(ff, gateName, wspFile, FJGroupName = NULL, ...)
 }
 \arguments{
 \item{ff}{a flowCore::flowFrame}
@@ -14,6 +14,9 @@ applyFlowJoGate(ff, gateName, wspFile, ...)
 \item{wspFile}{a flowjo workspace}
 
 \item{...}{Extra arguments passed to \code{getFlowJoLabels()}}
+
+\item{FJGroup}{optional flowjo group name in which to look for the sample
+file. This can be helpful in case of duplicate file names.}
 }
 \value{
 a flowFrame containing only the events inside the gate

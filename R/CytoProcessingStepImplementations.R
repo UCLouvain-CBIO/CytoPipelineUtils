@@ -1047,6 +1047,8 @@ qualityControlFlowClean <- function(ff,
 #' @param ff a flowCore::flowFrame
 #' @param gateName the name of the flowJo gate that will be applied 
 #' @param wspFile a flowjo workspace
+#' @param FJGroup optional flowjo group name in which to look for the sample
+#' file. This can be helpful in case of duplicate file names.
 #' @param ... Extra arguments passed to `getFlowJoLabels()`
 #'
 #' @return a flowFrame containing only the events inside the gate
@@ -1054,6 +1056,7 @@ qualityControlFlowClean <- function(ff,
 applyFlowJoGate <- function(ff,
                             gateName,
                             wspFile,
+                            FJGroupName = NULL,
                             ...) {
     #browser()
 
@@ -1066,8 +1069,24 @@ applyFlowJoGate <- function(ff,
     }
     
     ws <- CytoML::open_flowjo_xml(wspFile)
-    sampleDF <- CytoML::fj_ws_get_samples(ws)
+   
     sampleGroupDF <- CytoML::fj_ws_get_sample_groups(ws)
+    groupID <- NULL
+    if (!is.null(FJGroupName)) {
+        groupID <- 
+            sampleGroupDF[sampleGroupDF$groupName == FJGroupName, 
+                          "groupID", 
+                          drop = TRUE]
+        if (length(groupID) == 0){
+            stop("FJGroupName not existent or not containing any sample")
+        }
+        groupID <- groupID[1]
+        
+        # to correct for CytoML bug: group ids start from 0 in FlowJo
+        groupID <- groupID + 1
+    }
+    
+    sampleDF <- CytoML::fj_ws_get_samples(ws, group_id = groupID)
     
     fcsName <- flowCore::keyword(ff, "$FIL")[[1]]
     if (is.null(fcsName) || nchar(gsub(" ", "", fcsName)) == 0) {
@@ -1102,8 +1121,12 @@ applyFlowJoGate <- function(ff,
              fcsName, "] in FlowJo worspace")
     }
     
-    possibleGroups <- sampleGroupDF[sampleGroupDF$sampleID == sampleID,
-                                    "groupName", drop = TRUE]
+    if (!is.null(FJGroupName)) {
+        possibleGroups <- FJGroupName
+    } else {
+        possibleGroups <- sampleGroupDF[sampleGroupDF$sampleID == sampleID,
+                                        "groupName", drop = TRUE]
+    }
     
     if (length(possibleGroups) > 1 && "All Samples" %in% possibleGroups) {
         # remove All Samples which is the by default sample group

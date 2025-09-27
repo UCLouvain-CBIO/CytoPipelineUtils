@@ -351,6 +351,27 @@ test_that("applyFlowJoGate works", {
   #                    xScale = "logicle",
   #                    yScale = "logicle")
   
+  # test with FJ group name specified
+  ff_FJ_gated2 <- applyFlowJoGate(
+      ff_FJ_gated1,
+      wspFile = wspFile,
+      FJGroupName = "Donors",
+      gateName = "CD4+")
+  
+  expect_equal(
+      flowCore::exprs(ff_FJ_gated2),
+      flowCore::exprs(ref_ff_FJ_gated2)
+  )
+  
+  # test with WRONG FJ group name specified
+  expect_error(
+      {ff_FJ_gated2 <- applyFlowJoGate(
+          ff_FJ_gated1,
+          wspFile = wspFile,
+          FJGroupName = "Donors_wrong",
+          gateName = "CD4+")},
+      regexp = "FJGroupName not existent or not containing any sample")
+  
 })
 
 test_that("addFlowJoGatesInfo works", {

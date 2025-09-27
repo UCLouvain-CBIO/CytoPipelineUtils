@@ -1,5 +1,10 @@
 # CytoPipelineUtils 0.99
 
+## CytoPipelineUtils 0.99.9
+- `applyFlowJoGate()` now accept a Flow Jo group name to look for samples. 
+This can help to discriminate files in the nasty case when 
+some sample files have the same base name.
+
 ## CytoPipelineUtils 0.99.8
 - migrated to GHA cache v4
 
